@@ -32,6 +32,7 @@ LogEntry::LogEntry() {
     response_size = 0;
     successful = false;
     response_colour = vec3f(1.0, 0.0, 0.0);
+    response_time = 0.0;
 }
 
 Regex logentry_hostname_parts("([^.]+)(?:\\.([^.]+))?(?:\\.([^.]+))?(?:\\.([^.]+))?(?:\\.([^.]+))?(?:\\.([^.]+))?(?:\\.([^.]+))?(?:\\.([^.]+))?$");

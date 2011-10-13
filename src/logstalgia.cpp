@@ -165,7 +165,7 @@ Logstalgia::Logstalgia(std::string logfile, float simu_speed, float update_rate)
     background = vec3f(0.0, 0.0, 0.0);
 
     fontLarge  = fontmanager.grab("FreeSerif.ttf", 42);
-    fontMedium = fontmanager.grab("FreeMonoBold.ttf", 16);
+    fontMedium = fontmanager.grab("FreeMonoBold.ttf", 26);
     fontBall   = fontmanager.grab("FreeMonoBold.ttf", 16);
     fontSmall  = fontmanager.grab("FreeMonoBold.ttf", gFontSize);
 

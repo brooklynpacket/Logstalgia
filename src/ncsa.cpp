@@ -15,13 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
+#include <string.h>
 #include "ncsa.h"
 
 const char* ls_ncsa_months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug" , "Sep", "Oct", "Nov", "Dec" };
-Regex ls_ncsa_entry_start("^(?:([^ ]+) )?([^ ]+) +[^ ]+ +([^ ]+) +\\[(.*?)\\] +(.*)$");
+Regex ls_ncsa_entry_start("^(?:([^ ]+) )\"?([^\"]+)\" +[^ ]+ +([^ ]+) +\\[(.*?)\\] +(.*)$");
 Regex ls_ncsa_entry_date("(\\d+)/(\\d+|[A-Za-z]+)/(\\d+):(\\d+):(\\d+):(\\d+) ([+-])(\\d+)");
 Regex ls_ncsa_entry_request("\"([^ ]+) +([^ ]+) +([^ ]+)\" +([^ ]+) +([^\\s+]+)(.*)");
-Regex ls_ncsa_entry_agent("(?: +\"([^\"]+)\" +\"([^\"]+)\")?(?: +\([^ ]+))?");
+Regex ls_ncsa_entry_agent("(?: +\"([^\"]+)\" +\"([^\"]+)\")?(?: +\([^ ]+))?(?: +\([^ ]+))?(?: +\([^ ]+))?(?: +\"([^\"]+)\")?");
 
 NCSALog::NCSALog() {
 }
@@ -120,10 +122,23 @@ bool NCSALog::parseLine(std::string& line, LogEntry& entry) {
         matches.clear();
         ls_ncsa_entry_agent.match(agentstr, &matches);
 
-        if(matches.size()==3) {
+        if(matches.size()>=3) {
             entry.referrer   = matches[0];
             entry.user_agent = matches[1];
             entry.pid        = matches[2];
+
+            //total request time
+            if(matches.size()>=4)
+                entry.response_time = atof(matches[3].c_str());
+
+            //upstream response time
+            //if(matches.size()>=5)
+                //entry.response_time = atof(matches[4].c_str());
+                
+            if(matches.size()>=6){
+                if (matches[5].compare("-") != 0)
+                    entry.path = entry.path + "#" + matches[5];
+            }
         }
     }
 

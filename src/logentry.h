@@ -52,6 +52,7 @@ public:
 
     std::string response_code;
     long response_size;
+    float response_time;
 
     std::string referrer;
     std::string user_agent;

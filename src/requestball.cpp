@@ -35,7 +35,12 @@ RequestBall::RequestBall(LogEntry* le, FXFont* font, TextureResource* tex, const
     vel.normalize();
 
     int bytes = le->response_size;
-    float size = log((float)bytes) + 1.0f;
+    //float size = log((float)bytes) + 1.0f;
+    //if(size<5.0f) size = 5.0f;
+
+    float seconds = le->response_time;
+    float milliseconds = le->response_time * 1000.0f;
+    float size = (log(seconds + 1)/log(10)) * 50;
     if(size<5.0f) size = 5.0f;
 
     float eta = 5;
@@ -161,6 +166,9 @@ void RequestBall::draw(float dt) const {
 }
 
 void RequestBall::drawResponseCode() const {
+    if(response_code.compare("200") == 0 || response_code.compare("302") == 0)
+        return;
+
     float prog = getProgress();
     float drift = prog * 100.0f;
 
