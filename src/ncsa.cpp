@@ -23,7 +23,7 @@ const char* ls_ncsa_months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
 Regex ls_ncsa_entry_start("^(?:([^ ]+) )\"?([^\"]+)\" +[^ ]+ +([^ ]+) +\\[(.*?)\\] +(.*)$");
 Regex ls_ncsa_entry_date("(\\d+)/(\\d+|[A-Za-z]+)/(\\d+):(\\d+):(\\d+):(\\d+) ([+-])(\\d+)");
 Regex ls_ncsa_entry_request("\"([^ ]+) +([^ ]+) +([^ ]+)\" +([^ ]+) +([^\\s+]+)(.*)");
-Regex ls_ncsa_entry_agent("(?: +\"([^\"]+)\" +\"([^\"]+)\")?(?: +\([^ ]+))?(?: +\([^ ]+))?(?: +\([^ ]+))?(?: +\"([^\"]+)\")?");
+Regex ls_ncsa_entry_agent("(?: +\"([^\"]+)\" +\"([^\"]+)\")?(?: +\([^ ]+))?(?: +\([^ ]+))?(?: +\([^ ]+))?(?: +\"([^\"]+)\")?(?: +\"([^\"]+)\")?");
 
 NCSALog::NCSALog() {
 }
@@ -132,13 +132,24 @@ bool NCSALog::parseLine(std::string& line, LogEntry& entry) {
                 entry.response_time = atof(matches[3].c_str());
 
             //upstream response time
-            //if(matches.size()>=5)
-                //entry.response_time = atof(matches[4].c_str());
-                
-            if(matches.size()>=6){
+            if(matches.size()>=5)
+                entry.upstream_time = atof(matches[4].c_str());
+
+            //add label
+            entry.path = entry.path.substr(0, entry.path.find("?"));
+            if(matches.size()>=6)
                 if (matches[5].compare("-") != 0)
                     entry.path = entry.path + "#" + matches[5];
-            }
+
+            //failure message
+            if(matches.size()>=7)
+                if (matches[6].compare("-") != 0)
+                    entry.server_message = matches[6];
+
+            //detect nginx timeout
+            if (entry.server_message.size() == 0)
+                if (matches.size() >= 5 && entry.upstream_time == 0.0f && entry.response_time > 1.0f)
+                    entry.server_message = "Nginx Timeout";
         }
     }
 

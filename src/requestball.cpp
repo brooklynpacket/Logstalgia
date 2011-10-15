@@ -16,6 +16,7 @@
 */
 
 #include "requestball.h"
+#include <sstream>
 
 bool gBounce=true;
 bool gResponseCode=true;
@@ -41,7 +42,7 @@ RequestBall::RequestBall(LogEntry* le, FXFont* font, TextureResource* tex, const
     float seconds = le->response_time;
     float milliseconds = le->response_time * 1000.0f;
     float size = (log(seconds + 1)/log(10)) * 50;
-    if(size<5.0f) size = 5.0f;
+    if(size<12.0f) size = 12.0f;
 
     float eta = 5;
 
@@ -75,18 +76,31 @@ vec3f RequestBall::responseColour() {
 bool RequestBall::mouseOver(TextArea& textarea, vec2f& mouse) {
     //within 3 pixels
     if((pos - mouse).length2()<36.0f) {
-
+    
         std::vector<std::string> content;
 
         content.push_back( std::string( le->path ) );
         content.push_back( " " );
 
-        if(le->vhost.size()>0) content.push_back( std::string("Virtual-Host: ") + le->vhost );
-
         content.push_back( std::string("Remote-Host:  ") + le->hostname );
-
+        if(le->vhost.size()>0) content.push_back( std::string("Virtual-Host: ") + le->vhost );
         if(le->referrer.size()>0)   content.push_back( std::string("Referrer:     ") + le->referrer );
         if(le->user_agent.size()>0) content.push_back( std::string("User-Agent:   ") + le->user_agent );
+
+        //upstream time, nginx time and failure reason
+        msg = "";
+        if(le->upstream_time>=0){
+            std::stringstream s;
+            s << le->upstream_time;
+            msg += std::string("Upstream:   ") + s.str() + "\n";
+        }
+        if(le->response_time>=0){
+            std::stringstream ss;
+            ss << le->response_time;
+            msg += std::string("Nginx:   ") + ss.str() + "\n";
+        }
+        if(le->server_message.size()>0) msg += std::string("Failure:   ") + le->server_message;
+        content.push_back(msg);
 
         textarea.setText(content);
         textarea.setPos(mouse);
@@ -175,6 +189,21 @@ void RequestBall::drawResponseCode() const {
     if(!le->successful) drift *= -1.0f;
     vec2f msgpos = (vel * drift) + vec2f(dest.x-45.0f, dest.y);
 
+    std::string msgg = "";
+    if(le->upstream_time>=0){
+        std::stringstream s;
+        s << le->upstream_time;
+        msgg += std::string("Upstream: ") + s.str() + "\n";
+    }
+    if(le->response_time>=0){
+        std::stringstream ss;
+        ss << le->response_time;
+        msgg += std::string("Nginx: ") + ss.str() + "\n";
+    }
+    if(le->server_message.size()>0) msgg += std::string("Failure: ") + le->server_message + "\n";
+    msgg += "Response:   " + response_code;
+
     glColor4f(response_colour.x, response_colour.y, response_colour.z, 1.0f - std::min(1.0f, prog * 2.0f) );
-    font->draw(msgpos.x, msgpos.y, response_code.c_str());
+    font->draw(msgpos.x, msgpos.y, msgg);
+
 }

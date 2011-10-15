@@ -54,6 +54,9 @@ public:
     long response_size;
     float response_time;
 
+    float upstream_time;
+    std::string server_message;
+
     std::string referrer;
     std::string user_agent;
 

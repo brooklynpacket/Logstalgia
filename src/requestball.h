@@ -38,6 +38,8 @@ protected:
     FXFont* font;
     TextureResource* tex;
 
+    std::string msg;
+    
     std::string response_code;
     vec3f       response_colour;
 public:
