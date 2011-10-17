@@ -85,22 +85,26 @@ bool RequestBall::mouseOver(TextArea& textarea, vec2f& mouse) {
         content.push_back( std::string("Remote-Host:  ") + le->hostname );
         if(le->vhost.size()>0) content.push_back( std::string("Virtual-Host: ") + le->vhost );
         if(le->referrer.size()>0)   content.push_back( std::string("Referrer:     ") + le->referrer );
-        if(le->user_agent.size()>0) content.push_back( std::string("User-Agent:   ") + le->user_agent );
+        //if(le->user_agent.size()>0) content.push_back( std::string("User-Agent:   ") + le->user_agent );
 
         //upstream time, nginx time and failure reason
         msg = "";
         if(le->upstream_time>=0){
             std::stringstream s;
             s << le->upstream_time;
-            msg += std::string("Upstream:   ") + s.str() + "\n";
+            //msg += std::string("Upstream:   ") + s.str() + "\n";
+            content.push_back( std::string("Upstream:   ") + s.str() );
         }
         if(le->response_time>=0){
             std::stringstream ss;
             ss << le->response_time;
-            msg += std::string("Nginx:   ") + ss.str() + "\n";
+            //msg += std::string("Nginx:   ") + ss.str() + "\n";
+            content.push_back( std::string("Nginx:   ") + ss.str() );
         }
-        if(le->server_message.size()>0) msg += std::string("Failure:   ") + le->server_message;
-        content.push_back(msg);
+        //if(le->server_message.size()>0) msg += std::string("Failure:   ") + le->server_message;
+        if(le->server_message.size()>0) content.push_back( std::string("Failure:   ") + le->server_message );
+
+        //content.push_back(msg);
 
         textarea.setText(content);
         textarea.setPos(mouse);
@@ -190,20 +194,26 @@ void RequestBall::drawResponseCode() const {
     vec2f msgpos = (vel * drift) + vec2f(dest.x-45.0f, dest.y);
 
     std::string msgg = "";
+    std::string msggg = "";
+    std::string msgggg = "";
+    std::string msggggg = "";
     if(le->upstream_time>=0){
         std::stringstream s;
         s << le->upstream_time;
-        msgg += std::string("Upstream: ") + s.str() + "\n";
+        msggg += std::string("Upstream: ") + s.str();// + "\n";
     }
     if(le->response_time>=0){
         std::stringstream ss;
         ss << le->response_time;
-        msgg += std::string("Nginx: ") + ss.str() + "\n";
+        msgggg += std::string("Nginx: ") + ss.str();// + "\n";
     }
-    if(le->server_message.size()>0) msgg += std::string("Failure: ") + le->server_message + "\n";
-    msgg += "Response:   " + response_code;
+    if(le->server_message.size()>0) msggggg += std::string("Failure: ") + le->server_message;// + "\n";
+    msgg += "Response: " + response_code;
 
     glColor4f(response_colour.x, response_colour.y, response_colour.z, 1.0f - std::min(1.0f, prog * 2.0f) );
     font->draw(msgpos.x, msgpos.y, msgg);
 
+    font->draw(msgpos.x, msgpos.y + 20, msggg);
+    font->draw(msgpos.x, msgpos.y + 40, msgggg);
+    font->draw(msgpos.x, msgpos.y + 60, msggggg);
 }
