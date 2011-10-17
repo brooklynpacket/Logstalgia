@@ -137,9 +137,19 @@ bool NCSALog::parseLine(std::string& line, LogEntry& entry) {
 
             //add label
             entry.path = entry.path.substr(0, entry.path.find("?"));
-            if(matches.size()>=6)
-                if (matches[5].compare("-") != 0)
-                    entry.path = entry.path + "#" + matches[5];
+            if(matches.size()>=6){
+                if (matches[5].compare("-") != 0){
+                    std::string usable = matches[5];
+                    if(usable.find("/") == std::string::npos){
+                        int first = usable.rfind(".");
+                        if(first != std::string::npos){
+                            int second = usable.rfind(".", first-1);
+                            usable = usable.substr(second+1);
+                        }
+                    }
+                    entry.path = entry.path + "#" + usable;
+                }
+            }
 
             //failure message
             if(matches.size()>=7)

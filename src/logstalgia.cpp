@@ -515,6 +515,18 @@ BaseLog* Logstalgia::getLog() {
     return streamlog;
 }
 
+void Logstalgia::gatherStats(LogEntry& le){
+    if(stats.find(le.response_code) == stats.end())
+        stats[le.response_code] = 0;
+    stats[le.response_code]++;
+
+    if(le.server_message.size() > 0){
+        if(stats.find(le.server_message) == stats.end())
+            stats[le.server_message] = 0;
+        stats[le.server_message]++;
+    }
+}
+
 void Logstalgia::readLog(int buffer_rows) {
 
     profile_start("readLog");
@@ -574,6 +586,8 @@ void Logstalgia::readLog(int buffer_rows) {
             if(!(parsed_entry = accesslog->parseLine(linestr, le))) {
                 debugLog("error: could not read line %s\n", linestr.c_str());
             }
+            else
+                gatherStats(le);
         }
 
         if(parsed_entry) {
@@ -1252,6 +1266,24 @@ void Logstalgia::draw(float t, float dt) {
         fontMedium.print(2,19,"Balls %03d", balls.size());
         fontMedium.print(2,36,"Queue %03d", queued_entries.size());
         fontMedium.print(2,53,"Paddles %03d", paddles.size());
+
+        float total = 0;
+        int y_pos = 53;
+        for(std::map<std::string, long>::iterator stats_iter=stats.begin(); stats_iter != stats.end(); stats_iter++)
+            total = total + stats_iter->second;
+        for(std::map<std::string, long>::iterator stats_iter=stats.begin(); stats_iter != stats.end(); stats_iter++){
+            y_pos += 17;
+            if(isNumeric((stats_iter->first).c_str())){
+                float percent = (stats_iter->second*100) / total;
+                fontMedium.print(2,y_pos,"%s %4.1f%", (stats_iter->first).c_str(), percent);
+            }
+            else{
+                fontMedium.print(2,y_pos,"%s %d", (stats_iter->first).c_str(), stats_iter->second);
+            }
+        }
+        y_pos += 17;
+        fontMedium.print(2,y_pos,"Total %d", int(total));
+
     } else {
         fontMedium.draw(2,2,  displaydate.c_str());
         fontMedium.draw(2,19, displaytime.c_str());
@@ -1263,4 +1295,13 @@ void Logstalgia::draw(float t, float dt) {
     fontLarge.alignTop(false);
 
     fontLarge.print(display.width-10-counter_width,display.height-10, "%08d", highscore);
+}
+
+int Logstalgia::isNumeric (const char * s)
+{
+    if (s == NULL || *s == '\0' || isspace(*s))
+      return 0;
+    char * p;
+    strtod (s, &p);
+    return *p == '\0';
 }

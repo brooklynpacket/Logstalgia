@@ -49,6 +49,10 @@
 #include <time.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <iostream>
+#include <ctype.h>
+#include <stdlib.h>
+
 
 extern int   gHighscore;
 extern bool  gBounce;
@@ -177,6 +181,10 @@ class Logstalgia : public SDLApp {
 
     void logic(float t, float dt);
     void draw(float t, float dt);
+
+    std::map<std::string, long> stats;
+    void gatherStats(LogEntry& le);
+    int isNumeric (const char * s);
 public:
 	Logstalgia(std::string logfile, float simu_speed, float update_rate);
 	~Logstalgia();
