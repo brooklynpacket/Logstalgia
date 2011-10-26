@@ -140,13 +140,12 @@ bool NCSALog::parseLine(std::string& line, LogEntry& entry) {
             if(matches.size()>=6){
                 if (matches[5].compare("-") != 0){
                     std::string usable = matches[5];
-                    if(usable.find("/") == std::string::npos){
-                        int first = usable.find(".");
-                        if(first != std::string::npos){
-                            int second = usable.find(".", first+1);
-                            usable = usable.substr(second+1);
-                        }
-                    }
+		    int first = usable.find(".");
+		    printf("%d", first);
+		    if(first != std::string::npos){
+		        int second = usable.find(".", first+1);
+		        usable = usable.substr(second+1);
+		    }
                     entry.path = entry.path + "#" + usable;
                 }
             }
