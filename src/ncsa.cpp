@@ -141,7 +141,6 @@ bool NCSALog::parseLine(std::string& line, LogEntry& entry) {
                 if (matches[5].compare("-") != 0){
                     std::string usable = matches[5];
 		    int first = usable.find(".");
-		    printf("%d", first);
 		    if(first != std::string::npos){
 		        int second = usable.find(".", first+1);
 		        usable = usable.substr(second+1);
